@@ -1,0 +1,43 @@
+# Vagrantfile for multi-VM setup
+Vagrant.configure("2") do |config|
+    # Define common settings for all VMs
+    config.vm.box_check_update = false
+  
+    # Define web01
+    config.vm.define "web01" do |web01|
+      web01.vm.box = "ubuntu/focal64" # Ubuntu 20.04
+      web01.vm.hostname = "web01.local"
+      web01.vm.network "private_network", ip: "192.168.56.101"
+    end
+  
+    # Define web02
+    config.vm.define "web02" do |web02|
+      web02.vm.box = "ubuntu/focal64" # Ubuntu 20.04
+      web02.vm.hostname = "web02.local"
+      web02.vm.network "private_network", ip: "192.168.56.102"
+    end
+  
+    # Define db01
+    config.vm.define "db01" do |db01|
+      db01.vm.box = "eurolinux-vagrant/centos-stream-9" # CentOS 9
+      db01.vm.hostname = "db01.local"
+      db01.vm.network "private_network", ip: "192.168.56.103"
+  
+      # Provisioning script
+      db01.vm.provision "shell", inline: <<-SHELL
+        # Set the hostname
+        hostnamectl set-hostname db01.local
+  
+        # Update system and install MariaDB
+        yum update -y
+        yum install -y wget unzip mariadb-server -y
+  
+        # Enable and start MariaDB service
+        systemctl enable mariadb
+        systemctl start mariadb
+  
+    
+      SHELL
+    end
+  end
+  

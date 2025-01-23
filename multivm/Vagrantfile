@@ -1,43 +1,51 @@
-# Vagrantfile for multi-VM setup
-Vagrant.configure("2") do |config|
-    # Define common settings for all VMs
-    config.vm.box_check_update = false
-  
-    # Define web01
-    config.vm.define "web01" do |web01|
-      web01.vm.box = "ubuntu/focal64" # Ubuntu 20.04
-      web01.vm.hostname = "web01.local"
-      web01.vm.network "private_network", ip: "192.168.56.101"
-    end
-  
-    # Define web02
-    config.vm.define "web02" do |web02|
-      web02.vm.box = "ubuntu/focal64" # Ubuntu 20.04
-      web02.vm.hostname = "web02.local"
-      web02.vm.network "private_network", ip: "192.168.56.102"
-    end
-  
-    # Define db01
-    config.vm.define "db01" do |db01|
-      db01.vm.box = "eurolinux-vagrant/centos-stream-9" # CentOS 9
-      db01.vm.hostname = "db01.local"
-      db01.vm.network "private_network", ip: "192.168.56.103"
-  
-      # Provisioning script
-      db01.vm.provision "shell", inline: <<-SHELL
-        # Set the hostname
-        hostnamectl set-hostname db01.local
-  
-        # Update system and install MariaDB
-        yum update -y
-        yum install -y wget unzip mariadb-server -y
-  
-        # Enable and start MariaDB service
-        systemctl enable mariadb
-        systemctl start mariadb
-  
+    # -*- mode: ruby -*-
+    # vi: set ft=ruby :
+     
+    Vagrant.configure("2") do |config|
+     
+      # Configuration for web01 VM
+      config.vm.define "web01" do |web01|
+        web01.vm.box = "ubuntu/jammy64"
+        web01.vm.hostname = "web01"
+        web01.vm.network "private_network", ip: "192.168.40.11"
+        web01.vm.provider "virtualbox" do |vb|
+            vb.memory = "1024"
+            vb.cpus = 2
+          end
+        web01.vm.provision "shell", inline: <<-SHELL
+          apt update
+            apt install apache2 wget unzip -y
+            systemctl start apache2
+            systemctl enable apache2
+            cd /tmp/
+            wget https://www.tooplate.com/zip-templates/2119_gymso_fitness.zip
+            unzip -o 2119_gymso_fitness.zip
+            cp -r 2119_gymso_fitness/* /var/www/html/
+            systemctl restart apache2
+        SHELL
+      end
     
-      SHELL
+      # Configuration for db01 VM
+      config.vm.define "db01" do |db01|
+        db01.vm.box = "eurolinux-vagrant/centos-stream-9"
+        db01.vm.hostname = "db01"
+        db01.vm.network "private_network", ip: "192.168.40.12"
+        db01.vm.provider "virtualbox" do |vb|
+          vb.memory = "1024"
+          vb.cpus = 2
+       end
+    
+        # Provisioning with a shell script
+        db01.vm.provision "shell", inline: <<-SHELL
+          # Update package list and install necessary software 
+          yum install -y mariadb-server -y
+          systemctl start mariadb
+          systemctl start mariadb
+          systemctl enable mariadb
+    
+          mysql -u root -e 'CREATE DATABASE wordpress;'
+          mysql -u root -e 'GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER ON wordpress.* TO wordpress@localhost IDENTIFIED BY "admin123";'
+          mysql -u root -e 'FLUSH PRIVILEGES;'
+        SHELL
+      end
     end
-  end
-  
