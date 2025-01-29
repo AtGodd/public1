@@ -22,7 +22,7 @@ echo "#################################"
 echo "Starting Artifact Deplyoment"
 echo "#################################"
 mkdir -p /tmp/webfiles
-cd /tmp/webfiles
+#cd /tmp/webfiles
 echo
 
 
