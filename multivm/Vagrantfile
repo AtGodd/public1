@@ -2,7 +2,7 @@
     # vi: set ft=ruby :
      
     Vagrant.configure("2") do |config|
-     
+      config.vm.boot_timeout = 1200
       # Configuration for web01 VM
       config.vm.define "web01" do |web01|
         web01.vm.box = "ubuntu/jammy64"
