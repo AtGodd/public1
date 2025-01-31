@@ -1,0 +1,23 @@
+#ssh keygen and copy to each machine
+ssh-keygen
+  ssh-copy-id user@machine1
+  ssh-copy-id user@machine2
+  ssh-copy-id user@machine3
+
+#ssh path to keys
+ssh config  cat .ssh/id_rsa
+cat .ssh/id_rsa.pub
+
+#create folder and file with host names
+mkdir remote_websetup
+    cd remote_websetup/
+    vim remhosts
+    #command to execute from file remhosts to do command echo/ssh
+    for host in `cat remhosts`; do echo $host;done
+    for host in `cat remhosts`; do ssh devops@$host hostname;done
+    for host in `cat remhosts`; do ssh devops@$host uptime;done
+    for host in `cat remhosts`; do ssh devops@$host sudo yum install git -y;done
+
+    #remote copy file
+    scp testfile.txt devops@web01:/tmp/
+
