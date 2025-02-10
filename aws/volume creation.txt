@@ -1,0 +1,29 @@
+#disk listing
+fdisk -l
+
+#listing all devices, mount points and size
+df -h
+
+fdisk /dev/xvdf
+fdisk -l
+
+#formating
+mkfs.ext4 /dev/xvdf1
+
+#temporary mount
+mount /dev/xvdf1 /var/www/html/images/
+
+# umount temporary mounted point
+umount /var/www/html/images
+
+#edit file for pernament mount point
+vi /etc/fstab
+#example mount
+/dev/xvdf1      /var/www/html/images    ext4         defaults        0 0
+partition path  where you want mount it format type  options        dump code and fsck code
+                                                                    no dumping and no file system check
+#after editing fstab, use below command to mount all from fstab
+mount -a
+
+#if there are problems to open website, edit this file and reboot machine
+vi /etc/selinux/config
